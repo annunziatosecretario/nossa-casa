@@ -101,7 +101,15 @@ export default function Home() {
   const cancelForm = () => { setShowForm(false); setEditId(null) }
 
   const isOwned = (i) => i.price_range === '—' && i.purchased
-  const filtered = (sector ? items.filter(i => i.category === sector) : items).filter(i => showOwned || !isOwned(i))
+  const priorityOrder = { essencial: 0, importante: 1, desejavel: 2 }
+  const filtered = (sector ? items.filter(i => i.category === sector) : items)
+    .filter(i => showOwned || !isOwned(i))
+    .sort((a, b) => {
+      // Purchased items go to bottom
+      if (a.purchased !== b.purchased) return a.purchased ? 1 : -1
+      // Then sort by priority
+      return (priorityOrder[a.priority] ?? 1) - (priorityOrder[b.priority] ?? 1)
+    })
   const total = items.length
   const bought = items.filter(i => i.purchased).length
   const prog = total > 0 ? Math.round((bought / total) * 100) : 0
